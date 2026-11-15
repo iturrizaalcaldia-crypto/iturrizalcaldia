@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="es"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwMTUyODE1NjU2NzQxNjQ3NDUxMSIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzUzMzZmMDM1ZTg3MjBkMzZfaW5kZXguaHRtbC01MCJ9LCJleHAiOjE3OTQ3ODAyNTIsImlhdCI6MTc5NDc3NjY1MiwiYWxnIjoiUlMyNTYifQ.R0Fo36onEJj2_D4V_r_4L2nTMXteNunNjcCQbylDg8jf2hBBU03HjfMbKDLA-DHEsXucG0DV2TeS6VL55Cw75Bd611icAquvbU-TxtOeTE7pNKJfHqI9NH2wRS9pGUh8xMp7CAAMGxFXkfyR44E4LY5g8J3qgx4bFhzNN6YThRchr2mgEU5ZsGzmGK22G1K_UrR6WCqL4DYOIcHM33LvYVuZ7x2YkiDUbtKxhjxQ2UTByxcw06IjnU8y8JzszFSK-K84sHT38ZoKq_irYbqcoKm-qHAEqsc4Ubekvd7hPjZaS1lOdgquBQ5_StU7WvmbW0bnq67Wa0mEXR5aDFiaNg","c_5336f035e8720d36_index.html-50")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Diario de Tareas - Alcaldía Bolivariana Monseñor Iturriza</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fuente Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest" crossorigin="anonymous"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        institucional: {
+                            azul: '#0f2c59',
+                            azulClaro: '#1d4ed8',
+                            dorado: '#d97706',
+                            rojo: '#b91c1c',
+                            verde: '#15803d',
+                            grisFondo: '#f4f6f9'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:Inter, sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0, 0, 0, 0);white-space:nowrap;border-width:0}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.left-1{left:0.25rem}.right-4{right:1rem}.top-0{top:0px}.top-0\.5{top:0.125rem}.top-4{top:1rem}.z-30{z-index:30}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-1\.5{margin-bottom:0.375rem}.mb-3{margin-bottom:0.75rem}.ml-1{margin-left:0.25rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-1\.5{margin-top:0.375rem}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.mt-auto{margin-top:auto}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-1\.5{height:0.375rem}.h-14{height:3.5rem}.h-2{height:0.5rem}.h-3\.5{height:0.875rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-7{height:1.75rem}.h-8{height:2rem}.max-h-\[75vh\]{max-height:75vh}.min-h-screen{min-height:100vh}.w-1\/3{width:33.333333%}.w-14{width:3.5rem}.w-2{width:0.5rem}.w-3\.5{width:0.875rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-7{width:1.75rem}.w-8{width:2rem}.w-9{width:2.25rem}.w-full{width:100%}.max-w-3xl{max-width:48rem}.max-w-7xl{max-width:80rem}.max-w-md{max-width:28rem}.max-w-sm{max-width:24rem}.shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.border-collapse{border-collapse:collapse}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;user-select:none}.list-inside{list-style-position:inside}.list-decimal{list-style-type:decimal}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.divide-slate-200 > :not([hidden]) ~ :not([hidden]){--tw-divide-opacity:1;border-color:rgb(226 232 240 / var(--tw-divide-opacity, 1))}.self-start{align-self:flex-start}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-b-4{border-bottom-width:4px}.border-l-4{border-left-width:4px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-amber-200{--tw-border-opacity:1;border-color:rgb(253 230 138 / var(--tw-border-opacity, 1))}.border-amber-300{--tw-border-opacity:1;border-color:rgb(252 211 77 / var(--tw-border-opacity, 1))}.border-amber-500{--tw-border-opacity:1;border-color:rgb(245 158 11 / var(--tw-border-opacity, 1))}.border-blue-200{--tw-border-opacity:1;border-color:rgb(191 219 254 / var(--tw-border-opacity, 1))}.border-red-200{--tw-border-opacity:1;border-color:rgb(254 202 202 / var(--tw-border-opacity, 1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-slate-300{--tw-border-opacity:1;border-color:rgb(203 213 225 / var(--tw-border-opacity, 1))}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-white\/15{border-color:rgb(255 255 255 / 0.15)}.border-white\/20{border-color:rgb(255 255 255 / 0.2)}.border-emerald-200{--tw-border-opacity:1;border-color:rgb(167 243 208 / var(--tw-border-opacity, 1))}.border-emerald-300{--tw-border-opacity:1;border-color:rgb(110 231 183 / var(--tw-border-opacity, 1))}.border-emerald-400\/40{border-color:rgb(52 211 153 / 0.4)}.border-emerald-600{--tw-border-opacity:1;border-color:rgb(5 150 105 / var(--tw-border-opacity, 1))}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199 / var(--tw-bg-opacity, 1))}.bg-amber-50{--tw-bg-opacity:1;background-color:rgb(255 251 235 / var(--tw-bg-opacity, 1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.bg-blue-700{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity, 1))}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229 / var(--tw-bg-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-emerald-700{--tw-bg-opacity:1;background-color:rgb(4 120 87 / var(--tw-bg-opacity, 1))}.bg-institucional-azul{--tw-bg-opacity:1;background-color:rgb(15 44 89 / var(--tw-bg-opacity, 1))}.bg-institucional-grisFondo{--tw-bg-opacity:1;background-color:rgb(244 246 249 / var(--tw-bg-opacity, 1))}.bg-institucional-verde{--tw-bg-opacity:1;background-color:rgb(21 128 61 / var(--tw-bg-opacity, 1))}.bg-red-100{--tw-bg-opacity:1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.bg-red-50{--tw-bg-opacity:1;background-color:rgb(254 242 242 / var(--tw-bg-opacity, 1))}.bg-red-600{--tw-bg-opacity:1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-slate-200{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.bg-slate-300{--tw-bg-opacity:1;background-color:rgb(203 213 225 / var(--tw-bg-opacity, 1))}.bg-slate-400{--tw-bg-opacity:1;background-color:rgb(148 163 184 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-slate-50\/50{background-color:rgb(248 250 252 / 0.5)}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-slate-900\/50{background-color:rgb(15 23 42 / 0.5)}.bg-slate-900\/70{background-color:rgb(15 23 42 / 0.7)}.bg-slate-900\/80{background-color:rgb(15 23 42 / 0.8)}.bg-teal-100{--tw-bg-opacity:1;background-color:rgb(204 251 241 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/10{background-color:rgb(255 255 255 / 0.1)}.bg-yellow-400{--tw-bg-opacity:1;background-color:rgb(250 204 21 / var(--tw-bg-opacity, 1))}.bg-emerald-400{--tw-bg-opacity:1;background-color:rgb(52 211 153 / var(--tw-bg-opacity, 1))}.bg-emerald-500\/20{background-color:rgb(16 185 129 / 0.2)}.bg-slate-50\/60{background-color:rgb(248 250 252 / 0.6)}.p-1\.5{padding:0.375rem}.p-2\.5{padding:0.625rem}.p-3\.5{padding:0.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.px-7{padding-left:1.75rem;padding-right:1.75rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-12{padding-top:3rem;padding-bottom:3rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-5{padding-top:1.25rem;padding-bottom:1.25rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.pt-2{padding-top:0.5rem}.pt-3{padding-top:0.75rem}.text-left{text-align:left}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-sans{font-family:Inter, sans-serif}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.capitalize{text-transform:capitalize}.italic{font-style:italic}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.tracking-tight{letter-spacing:-0.025em}.tracking-wider{letter-spacing:0.05em}.tracking-widest{letter-spacing:0.1em}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.text-amber-600{--tw-text-opacity:1;color:rgb(217 119 6 / var(--tw-text-opacity, 1))}.text-amber-900{--tw-text-opacity:1;color:rgb(120 53 15 / var(--tw-text-opacity, 1))}.text-blue-200{--tw-text-opacity:1;color:rgb(191 219 254 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-800{--tw-text-opacity:1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.text-blue-900{--tw-text-opacity:1;color:rgb(30 58 138 / var(--tw-text-opacity, 1))}.text-emerald-800{--tw-text-opacity:1;color:rgb(6 95 70 / var(--tw-text-opacity, 1))}.text-institucional-azul{--tw-text-opacity:1;color:rgb(15 44 89 / var(--tw-text-opacity, 1))}.text-institucional-verde{--tw-text-opacity:1;color:rgb(21 128 61 / var(--tw-text-opacity, 1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.text-red-700{--tw-text-opacity:1;color:rgb(185 28 28 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-teal-600{--tw-text-opacity:1;color:rgb(13 148 136 / var(--tw-text-opacity, 1))}.text-teal-800{--tw-text-opacity:1;color:rgb(17 94 89 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-emerald-200{--tw-text-opacity:1;color:rgb(167 243 208 / var(--tw-text-opacity, 1))}.underline{-webkit-text-decoration-line:underline;text-decoration-line:underline}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.empty\:hidden:empty{display:none}.hover\:border-institucional-verde:hover{--tw-border-opacity:1;border-color:rgb(21 128 61 / var(--tw-border-opacity, 1))}.hover\:bg-blue-900:hover{--tw-bg-opacity:1;background-color:rgb(30 58 138 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-50\/50:hover{background-color:rgb(236 253 245 / 0.5)}.hover\:bg-emerald-800:hover{--tw-bg-opacity:1;background-color:rgb(6 95 70 / var(--tw-bg-opacity, 1))}.hover\:bg-red-700:hover{--tw-bg-opacity:1;background-color:rgb(185 28 28 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-100:hover{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-50:hover{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-900:hover{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.hover\:bg-white\/20:hover{background-color:rgb(255 255 255 / 0.2)}.hover\:text-amber-700:hover{--tw-text-opacity:1;color:rgb(180 83 9 / var(--tw-text-opacity, 1))}.hover\:shadow-lg:hover{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.focus\:border-institucional-azul:focus{--tw-border-opacity:1;border-color:rgb(15 44 89 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-institucional-azul:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(15 44 89 / var(--tw-ring-opacity, 1))}.focus\:ring-institucional-verde:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(21 128 61 / var(--tw-ring-opacity, 1))}.disabled\:cursor-not-allowed:disabled{cursor:not-allowed}.disabled\:bg-slate-100:disabled{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.disabled\:text-slate-400:disabled{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.disabled\:opacity-50:disabled{opacity:0.5}.disabled\:hover\:border-slate-300:hover:disabled{--tw-border-opacity:1;border-color:rgb(203 213 225 / var(--tw-border-opacity, 1))}.disabled\:hover\:bg-white:hover:disabled{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}@media (min-width: 640px){.sm\:h-16{height:4rem}.sm\:h-9{height:2.25rem}.sm\:w-16{width:4rem}.sm\:w-9{width:2.25rem}.sm\:w-auto{width:auto}.sm\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}.sm\:self-auto{align-self:auto}.sm\:p-8{padding:2rem}.sm\:px-0{padding-left:0px;padding-right:0px}.sm\:px-5{padding-left:1.25rem;padding-right:1.25rem}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}.sm\:py-8{padding-top:2rem;padding-bottom:2rem}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:text-3xl{font-size:1.875rem;line-height:2.25rem}}@media (min-width: 1024px){.lg\:flex-row{flex-direction:row}.lg\:flex-col{flex-direction:column}.lg\:items-end{align-items:flex-end}.lg\:items-center{align-items:center}.lg\:justify-between{justify-content:space-between}.lg\:px-8{padding-left:2rem;padding-right:2rem}}</style></head>
+<body class="bg-institucional-grisFondo text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Contenedor de Notificaciones Toast (Reemplazo seguro de alert) -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- Barra Superior Institucional (Franja tricolor sutil) -->
+    <div class="w-full h-1.5 flex">
+        <div class="w-1/3 bg-yellow-400"></div>
+        <div class="w-1/3 bg-blue-700"></div>
+        <div class="w-1/3 bg-red-600"></div>
+    </div>
+
+    <!-- Encabezado Institucional -->
+    <header class="bg-institucional-azul text-white shadow-lg border-b-4 border-amber-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                
+                <!-- Identidad Institucional -->
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0 shadow-inner">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="landmark" aria-hidden="true" class="lucide lucide-landmark w-8 h-8 sm:w-9 sm:h-9 text-amber-400"><path d="M10 18v-7"></path><path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z"></path><path d="M14 18v-7"></path><path d="M18 18v-7"></path><path d="M3 22h18"></path><path d="M6 18v-7"></path></svg>
+                    </div>
+                    <div>
+                        <span class="inline-block text-[11px] uppercase tracking-widest font-semibold text-amber-300 bg-white/10 px-2.5 py-0.5 rounded-full mb-1">
+                            República Bolivariana de Venezuela • Estado Falcón
+                        </span>
+                        <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">
+                            Alcaldía Bolivariana Monseñor Iturriza
+                        </h1>
+                        <p class="text-xs sm:text-sm text-blue-200 font-medium mt-0.5">
+                            Sistema de Reporte Diario de Tareas y Gestión Operativa
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Reloj en Tiempo Real y Estado de Ventanas -->
+                <div class="bg-slate-900/50 border border-white/15 rounded-xl p-3.5 sm:px-5 flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end justify-between gap-2 backdrop-blur-sm">
+                    <div class="flex items-center gap-2 text-amber-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clock" aria-hidden="true" class="lucide lucide-clock w-4 h-4 animate-pulse"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                        <span id="live-clock" class="text-lg sm:text-xl font-bold tracking-wider font-mono">05:06:33 p. m.</span>
+                    </div>
+                    <div id="live-date" class="text-xs text-slate-300 capitalize">domingo, 15 de noviembre de 2026</div>
+                    <div id="schedule-global-badge" class="mt-1 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-200 border border-emerald-400/40"><span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>Recepción Activa: Cierre de Jornada</span></div>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- Navegación de Pestañas Principales -->
+    <div class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-2 py-2.5">
+            <nav class="flex flex-wrap gap-2" aria-label="Tabs">
+                <button onclick="switchTab('registro')" id="tab-btn-registro" class="tab-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clipboard-edit" aria-hidden="true" class="lucide lucide-clipboard-edit w-4 h-4"><path d="M16 4h2a2 2 0 0 1 2 2v2"></path><path d="M21.34 15.664a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"></path><path d="M8 22H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1"></rect></svg>
+                    <span>Formulario de Reporte</span>
+                </button>
+                <button onclick="switchTab('historial')" id="tab-btn-historial" class="tab-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="table-2" aria-hidden="true" class="lucide lucide-table-2 w-4 h-4"><path d="M3 9h18"></path><path d="M9 3v18"></path><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg>
+                    <span>Registros Guardados</span>
+                    <span id="records-count-badge" class="ml-1 bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+                </button>
+                <button onclick="switchTab('guia')" id="tab-btn-guia" class="tab-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-institucional-azul text-white shadow-sm transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="globe" aria-hidden="true" class="lucide lucide-globe w-4 h-4"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+                    <span>¿Cómo publicar esta página gratis?</span>
+                </button>
+            </nav>
+
+            <!-- Interruptor Discreto de Modo Prueba -->
+            <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                <label for="demo-mode-toggle" class="flex items-center cursor-pointer gap-2 select-none">
+                    <div class="relative">
+                        <input type="checkbox" id="demo-mode-toggle" class="sr-only" onchange="toggleDemoMode()">
+                        <div id="demo-toggle-bg" class="w-9 h-5 bg-slate-300 rounded-full shadow-inner transition-colors"></div>
+                        <div id="demo-toggle-dot" class="dot absolute w-3.5 h-3.5 bg-white rounded-full shadow left-1 top-0.5 transition-transform"></div>
+                    </div>
+                    <span class="text-xs font-medium text-slate-600 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="flask-conical" aria-hidden="true" class="lucide lucide-flask-conical w-3.5 h-3.5 text-amber-600"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"></path><path d="M6.453 15h11.094"></path><path d="M8.5 2h7"></path></svg>
+                        Modo Prueba / Simular Horario
+                    </span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Banner Informativo cuando el Modo Prueba está activo -->
+    <div id="demo-banner" class="hidden bg-amber-50 border-b border-amber-300 text-amber-900 px-4 py-2.5 text-xs sm:text-sm">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div class="flex items-center gap-2 font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="alert-triangle" aria-hidden="true" class="lucide lucide-alert-triangle w-4 h-4 text-amber-600 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+                <span><strong>Modo Demostración Activo:</strong> Las restricciones de horario (06:00 AM - 11:00 AM y 01:00 PM - 08:00 PM) están desbloqueadas temporalmente para pruebas.</span>
+            </div>
+            <button onclick="document.getElementById('demo-mode-toggle').click()" class="text-xs font-bold underline hover:text-amber-700 shrink-0">
+                Volver a horario real
+            </button>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+        <!-- ============================================================== -->
+        <!-- PESTAÑA 1: FORMULARIO DE REPORTE DIARIO                        -->
+        <!-- ============================================================== -->
+        <section id="view-registro" class="space-y-6 hidden">
+            
+            <!-- Tarjetas Resumen de Horarios Permitidos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Tarjeta Turno Mañana -->
+                <div id="card-status-morning" class="bg-white rounded-2xl p-4 border-l-4 border-slate-300 shadow-sm flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <div class="p-2.5 rounded-xl bg-blue-50 text-institucional-azul shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sunrise" aria-hidden="true" class="lucide lucide-sunrise w-6 h-6"><path d="M12 2v8"></path><path d="m4.93 10.93 1.41 1.41"></path><path d="M2 18h2"></path><path d="M20 18h2"></path><path d="m19.07 10.93-1.41 1.41"></path><path d="M22 22H2"></path><path d="m8 6 4-4 4 4"></path><path d="M16 18a4 4 0 0 0-8 0"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-800">Bloque 1: Planificación Matutina</h2>
+                            <p class="text-xs text-slate-500 mt-0.5">Carga de <strong>Actividades a Realizar</strong></p>
+                            <p class="text-xs font-semibold text-institucional-azul mt-1">Horario: 06:00 AM a 11:00 AM</p>
+                        </div>
+                    </div>
+                    <span id="badge-morning" class="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 shrink-0">CERRADO</span>
+                </div>
+
+                <!-- Tarjeta Turno Tarde -->
+                <div id="card-status-afternoon" class="bg-white rounded-2xl p-4 border-l-4 border-emerald-600 shadow-sm flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <div class="p-2.5 rounded-xl bg-emerald-50 text-institucional-verde shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sunset" aria-hidden="true" class="lucide lucide-sunset w-6 h-6"><path d="M12 10V2"></path><path d="m4.93 10.93 1.41 1.41"></path><path d="M2 18h2"></path><path d="M20 18h2"></path><path d="m19.07 10.93-1.41 1.41"></path><path d="M22 22H2"></path><path d="m16 6-4 4-4-4"></path><path d="M16 18a4 4 0 0 0-8 0"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-800">Bloque 2: Cierre de Jornada</h2>
+                            <p class="text-xs text-slate-500 mt-0.5">Carga de <strong>Actividades Ejecutadas y Fotos</strong></p>
+                            <p class="text-xs font-semibold text-institucional-verde mt-1">Horario: 01:00 PM a 08:00 PM</p>
+                        </div>
+                    </div>
+                    <span id="badge-afternoon" class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 shrink-0">ABIERTO</span>
+                </div>
+            </div>
+
+            <!-- Formulario Principal -->
+            <form id="report-form" onsubmit="handleFormSubmit(event)" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                
+                <!-- Cabecera del Formulario -->
+                <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h3 class="text-base sm:text-lg font-bold text-institucional-azul flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="file-spreadsheet" aria-hidden="true" class="lucide lucide-file-spreadsheet w-5 h-5 text-amber-600"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M8 13h2"></path><path d="M14 13h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg>
+                            Registro de Gestión Operativa Diaria
+                        </h3>
+                        <p class="text-xs text-slate-500">Complete los datos institucionales y las actividades correspondientes a la franja horaria activa.</p>
+                    </div>
+                    <span class="text-xs font-medium text-slate-500 bg-white px-3 py-1 rounded-lg border border-slate-200 self-start sm:self-auto">
+                        Campos con <span class="text-red-600 font-bold">*</span> son obligatorios
+                    </span>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    
+                    <!-- Datos Generales: Fecha, Departamento y Responsable -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <!-- Fecha -->
+                        <div>
+                            <label for="input-fecha" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                Fecha del Reporte <span class="text-red-600">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="date" id="input-fecha" required="" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-institucional-azul focus:border-institucional-azul transition-all bg-white">
+                            </div>
+                        </div>
+
+                        <!-- Departamento -->
+                        <div>
+                            <label for="input-departamento" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                Dirección / Departamento <span class="text-red-600">*</span>
+                            </label>
+                            <select id="input-departamento" required="" onchange="checkExistingMorningRecord()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-institucional-azul focus:border-institucional-azul transition-all bg-white">
+                                <option value="" disabled="" selected="">-- Seleccione su dependencia --</option>
+                                <option value="Despacho del Alcalde">Despacho del Alcalde</option>
+                                <option value="Dirección General">Dirección General</option>
+                                <option value="Ingeniería Municipal">Ingeniería Municipal</option>
+                                <option value="Servicios Públicos">Servicios Públicos</option>
+                                <option value="Administración y Hacienda">Administración y Hacienda</option>
+                                <option value="Recursos Humanos">Recursos Humanos</option>
+                                <option value="Desarrollo Social">Desarrollo Social</option>
+                                <option value="Catastro y Tierras Urbanas">Catastro y Tierras Urbanas</option>
+                                <option value="Cultura y Turismo">Cultura y Turismo</option>
+                                <option value="Deporte y Juventud">Deporte y Juventud</option>
+                                <option value="Protección Civil">Protección Civil</option>
+                                <option value="Registro Civil">Registro Civil</option>
+                                <option value="Consejo Municipal de Derechos del Niño, Niña y Adolescente (CMDNNA)">Consejo Municipal de Derechos del Niño, Niña y Adolescente (CMDNNA)</option>
+                                <option value="Tecnología e Informática">Tecnología e Informática</option>
+                            </select>
+                        </div>
+
+                        <!-- Responsable -->
+                        <div>
+                            <label for="input-responsable" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                                Responsable / Funcionario
+                            </label>
+                            <input type="text" id="input-responsable" placeholder="Ej. Ing. Carlos Pérez (Director)" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-institucional-azul focus:border-institucional-azul transition-all bg-white">
+                        </div>
+                    </div>
+
+                    <!-- Aviso de vinculación automática si ya existe planificación matutina -->
+                    <div id="morning-link-notice" class="hidden bg-blue-50 border border-blue-200 rounded-xl p-3.5 flex items-start gap-3 text-xs text-blue-900">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="info" aria-hidden="true" class="lucide lucide-info w-5 h-5 text-blue-600 shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                        <div>
+                            <p class="font-bold">Planificación matutina detectada para este departamento y fecha:</p>
+                            <p id="morning-link-preview" class="mt-1 text-blue-800 italic"></p>
+                            <p class="mt-1 text-[11px] text-blue-600">Al guardar las actividades ejecutadas, se vincularán automáticamente con este reporte del día.</p>
+                        </div>
+                    </div>
+
+                    <hr class="border-slate-200">
+
+                    <!-- BLOQUE 1: ACTIVIDADES A REALIZAR (06:00 AM - 11:00 AM) -->
+                    <div id="block-morning-container" class="rounded-2xl border-2 border-slate-200 p-5 transition-all relative bg-slate-50/60">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                            <label for="input-actividades-realizar" class="text-sm font-bold text-institucional-azul flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-lg bg-institucional-azul text-white text-xs flex items-center justify-center font-bold">1</span>
+                                Actividades a Realizar (Planificación Matutina)
+                            </label>
+                            <span id="morning-lock-alert" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-lg bg-red-50 text-red-700 border border-red-200"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="lock" aria-hidden="true" class="lucide lucide-lock w-3.5 h-3.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Horario cerrado: Disponible de 06:00 AM a 11:00 AM</span>
+                        </div>
+
+                        <textarea id="input-actividades-realizar" rows="4" placeholder="Describa detalladamente las metas, inspecciones, operativos o tareas planificadas para la jornada de hoy..." class="w-full rounded-xl border border-slate-300 p-3.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-institucional-azul transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed" disabled=""></textarea>
+                        
+                        <p class="text-[11px] text-slate-500 mt-1.5 flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clock-4" aria-hidden="true" class="lucide lucide-clock-4 w-3.5 h-3.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                            Ventana de recepción habilitada estrictamente de 06:00 AM a 11:00 AM.
+                        </p>
+                    </div>
+
+                    <!-- BLOQUE 2: ACTIVIDADES EJECUTADAS Y FOTOS (01:00 PM - 08:00 PM) -->
+                    <div id="block-afternoon-container" class="rounded-2xl border-2 p-5 transition-all space-y-5 border-emerald-300 bg-white">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <label for="input-actividades-ejecutadas" class="text-sm font-bold text-institucional-verde flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-lg bg-institucional-verde text-white text-xs flex items-center justify-center font-bold">2</span>
+                                Actividades Ejecutadas y Evidencia Fotográfica (Cierre de Jornada)
+                            </label>
+                            <span id="afternoon-lock-alert" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="unlock" aria-hidden="true" class="lucide lucide-unlock w-3.5 h-3.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg> Ventana Activa (01:00 PM - 08:00 PM)</span>
+                        </div>
+
+                        <!-- Textarea Actividades Ejecutadas -->
+                        <div>
+                            <textarea id="input-actividades-ejecutadas" rows="4" placeholder="Describa los logros alcanzados, tareas culminadas, comunidades atendidas y observaciones del cierre de jornada..." class="w-full rounded-xl border border-slate-300 p-3.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-institucional-verde transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"></textarea>
+                        </div>
+
+                        <!-- Carga de Evidencia Fotográfica (Máximo 3 fotos) -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                                <div>
+                                    <label class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="camera" aria-hidden="true" class="lucide lucide-camera w-4 h-4 text-institucional-verde"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"></path><circle cx="12" cy="13" r="3"></circle></svg>
+                                        Evidencia Fotográfica (Máximo 3 fotografías)
+                                    </label>
+                                    <p class="text-[11px] text-slate-500 mt-0.5">Formatos permitidos: JPG, PNG, WEBP. Las imágenes se optimizan automáticamente para almacenamiento seguro.</p>
+                                </div>
+                                <span id="photo-counter-badge" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 self-start sm:self-auto">
+                                    0 / 3 fotos cargadas
+                                </span>
+                            </div>
+
+                            <!-- Zona de Selección de Archivos -->
+                            <div id="photo-dropzone" class="relative">
+                                <input type="file" id="input-fotos" accept="image/*" multiple="" onchange="handlePhotoSelection(event)" class="hidden">
+                                <button type="button" id="btn-select-photos" onclick="document.getElementById('input-fotos').click()" class="w-full py-4 px-4 border-2 border-dashed border-slate-300 rounded-xl bg-white hover:bg-emerald-50/50 hover:border-institucional-verde transition-all flex flex-col items-center justify-center gap-1.5 text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-slate-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="image-plus" aria-hidden="true" class="lucide lucide-image-plus w-6 h-6 text-institucional-verde"><path d="M16 5h6"></path><path d="M19 2v6"></path><path d="M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5"></path><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path><circle cx="9" cy="9" r="2"></circle></svg>
+                                    <span class="text-xs sm:text-sm font-semibold">Haga clic aquí para seleccionar fotografías (Máx. 3)</span>
+                                    <span class="text-[11px] text-slate-400">Puede seleccionar hasta 3 imágenes simultáneamente o una por una</span>
+                                </button>
+                            </div>
+
+                            <!-- Vista Previa en Miniatura (Thumbnails) -->
+                            <div id="photo-previews-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 empty:hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción del Formulario -->
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                        <button type="button" onclick="resetForm()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 text-sm font-semibold hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="rotate-ccw" aria-hidden="true" class="lucide lucide-rotate-ccw w-4 h-4"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                            Limpiar Campos
+                        </button>
+
+                        <button type="submit" id="btn-submit-report" class="w-full sm:w-auto px-7 py-3 rounded-xl bg-institucional-azul hover:bg-blue-900 text-white text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="save" aria-hidden="true" class="lucide lucide-save w-4 h-4"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path><path d="M7 3v4a1 1 0 0 0 1 1h7"></path></svg>
+                            <span>Guardar Reporte Diario</span>
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- PESTAÑA 2: HISTORIAL DE REGISTROS Y EXPORTACIÓN                -->
+        <!-- ============================================================== -->
+        <section id="view-historial" class="hidden space-y-6">
+            
+            <!-- Barra de Herramientas: Filtros y Exportación -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-institucional-azul flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="folder-check" aria-hidden="true" class="lucide lucide-folder-check w-5 h-5 text-amber-600"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path><path d="m9 13 2 2 4-4"></path></svg>
+                            Consolidado de Reportes Diarios
+                        </h2>
+                        <p class="text-xs text-slate-500">Consulte, filtre y descargue los reportes almacenados en formato Microsoft Excel o TXT.</p>
+                    </div>
+
+                    <!-- Botones de Descarga -->
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <button onclick="exportToExcel()" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-bold shadow-sm transition-all flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="file-spreadsheet" aria-hidden="true" class="lucide lucide-file-spreadsheet w-4 h-4"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M8 13h2"></path><path d="M14 13h2"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg>
+                            Descargar Excel (.xls)
+                        </button>
+                        <button onclick="exportToTXT()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs sm:text-sm font-bold shadow-sm transition-all flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="file-text" aria-hidden="true" class="lucide lucide-file-text w-4 h-4"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>
+                            Descargar TXT (.txt)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filtros Rápidos -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Filtrar por Fecha</label>
+                        <input type="date" id="filter-date" onchange="renderRecordsTable()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-institucional-azul">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Filtrar por Departamento</label>
+                        <select id="filter-dept" onchange="renderRecordsTable()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-institucional-azul">
+                            <option value="">Todos los departamentos</option>
+                            <option value="Despacho del Alcalde">Despacho del Alcalde</option>
+                            <option value="Dirección General">Dirección General</option>
+                            <option value="Ingeniería Municipal">Ingeniería Municipal</option>
+                            <option value="Servicios Públicos">Servicios Públicos</option>
+                            <option value="Administración y Hacienda">Administración y Hacienda</option>
+                            <option value="Recursos Humanos">Recursos Humanos</option>
+                            <option value="Desarrollo Social">Desarrollo Social</option>
+                            <option value="Catastro y Tierras Urbanas">Catastro y Tierras Urbanas</option>
+                            <option value="Cultura y Turismo">Cultura y Turismo</option>
+                            <option value="Deporte y Juventud">Deporte y Juventud</option>
+                            <option value="Protección Civil">Protección Civil</option>
+                            <option value="Registro Civil">Registro Civil</option>
+                            <option value="Consejo Municipal de Derechos del Niño, Niña y Adolescente (CMDNNA)">CMDNNA</option>
+                            <option value="Tecnología e Informática">Tecnología e Informática</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <button onclick="clearFilters()" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                            Mostrar Todos los Registros
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Registros -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-institucional-azul text-white text-xs uppercase tracking-wider">
+                                <th class="py-3.5 px-4 font-semibold">Fecha / Turno</th>
+                                <th class="py-3.5 px-4 font-semibold">Departamento y Responsable</th>
+                                <th class="py-3.5 px-4 font-semibold">Actividades a Realizar (06:00 - 11:00 AM)</th>
+                                <th class="py-3.5 px-4 font-semibold">Actividades Ejecutadas (01:00 - 08:00 PM)</th>
+                                <th class="py-3.5 px-4 font-semibold text-center">Evidencia</th>
+                                <th class="py-3.5 px-4 font-semibold text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="records-table-body" class="divide-y divide-slate-200 text-xs sm:text-sm"></tbody>
+                    </table>
+                </div>
+
+                <!-- Estado Vacío -->
+                <div id="empty-records-state" class="py-12 px-4 text-center">
+                    <div class="w-14 h-14 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="inbox" aria-hidden="true" class="lucide lucide-inbox w-7 h-7"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-700">No hay reportes registrados aún</h3>
+                    <p class="text-xs text-slate-500 max-w-md mx-auto mt-1">
+                        Complete el formulario en la pestaña "Formulario de Reporte" para comenzar a registrar la gestión diaria de los departamentos.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- PESTAÑA 3: GUÍA DE PUBLICACIÓN GRATUITA                        -->
+        <!-- ============================================================== -->
+        <section id="view-guia" class="space-y-6">
+            <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200">
+                <div class="max-w-3xl">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check-circle-2" aria-hidden="true" class="lucide lucide-check-circle-2 w-3.5 h-3.5"><circle cx="12" cy="12" r="10"></circle><path d="m16 9-5.5 5.5L8 12"></path></svg>
+                        100% Gratuito y Sin Mantenimiento de Servidores
+                    </span>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-institucional-azul">
+                        ¿Cómo publicar este sistema en Internet de forma gratuita?
+                    </h2>
+                    <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                        Esta aplicación está construida en un <strong>único archivo HTML autónomo</strong>. Esto significa que puede subirla en menos de 2 minutos a plataformas gratuitas de alojamiento web estático para compartir el enlace con todos los directores y jefes de departamento de la Alcaldía.
+                    </p>
+                </div>
+
+                <!-- Paso previo: Descargar este mismo archivo -->
+                <div class="mt-6 p-4 rounded-xl bg-blue-50 border border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-start gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="download-cloud" aria-hidden="true" class="lucide lucide-download-cloud w-6 h-6 text-institucional-azul shrink-0 mt-0.5"><path d="M12 13v8l-4-4"></path><path d="m12 21 4-4"></path><path d="M4.393 15.269A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.436 8.284"></path></svg>
+                        <div>
+                            <h3 class="text-sm font-bold text-institucional-azul">Paso Previo: Guarde este archivo como "index.html"</h3>
+                            <p class="text-xs text-slate-600 mt-0.5">Descargue el código fuente listo para subir directamente a cualquier plataforma.</p>
+                        </div>
+                    </div>
+                    <button onclick="downloadSelfHTML()" class="px-4 py-2.5 rounded-xl bg-institucional-azul hover:bg-blue-900 text-white text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="file-code" aria-hidden="true" class="lucide lucide-file-code w-4 h-4"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"></path><path d="M14 2v5a1 1 0 0 0 1 1h5"></path><path d="M10 12.5 8 15l2 2.5"></path><path d="m14 12.5 2 2.5-2 2.5"></path></svg>
+                        Descargar index.html
+                    </button>
+                </div>
+
+                <!-- 3 Opciones Gratuitas -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
+                    
+                    <!-- Opción 1: Netlify Drop -->
+                    <div class="rounded-2xl border border-slate-200 p-5 bg-slate-50/50 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="px-2.5 py-1 rounded-lg bg-teal-100 text-teal-800 text-xs font-bold">Más Rápida (30 seg)</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="zap" aria-hidden="true" class="lucide lucide-zap w-5 h-5 text-teal-600"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"></path></svg>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-800">1. Netlify Drop</h3>
+                            <ol class="mt-3 space-y-2 text-xs text-slate-600 list-decimal list-inside leading-relaxed">
+                                <li>Guarde este archivo en una carpeta llamada <code class="bg-slate-200 px-1 rounded">alcaldia-reporte</code> con el nombre <strong>index.html</strong>.</li>
+                                <li>Ingrese a <strong>app.netlify.com/drop</strong> y cree una cuenta gratuita.</li>
+                                <li>Arrastre la carpeta completa hacia el recuadro de la pantalla.</li>
+                                <li>¡Listo! Netlify le entregará un enlace público <code class="bg-slate-200 px-1 rounded">https://...netlify.app</code> al instante.</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Opción 2: GitHub Pages -->
+                    <div class="rounded-2xl border border-slate-200 p-5 bg-slate-50/50 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-800 text-xs font-bold">Código Abierto</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="git-branch" aria-hidden="true" class="lucide lucide-git-branch w-5 h-5 text-slate-700"><path d="M15 6a9 9 0 0 0-9 9V3"></path><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle></svg>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-800">2. GitHub Pages</h3>
+                            <ol class="mt-3 space-y-2 text-xs text-slate-600 list-decimal list-inside leading-relaxed">
+                                <li>Cree una cuenta gratuita en <strong>github.com</strong> y cree un repositorio público (ej. <code class="bg-slate-200 px-1 rounded">reporte-iturriza</code>).</li>
+                                <li>Suba el archivo <strong>index.html</strong> usando el botón <em>"Add file &gt; Upload files"</em>.</li>
+                                <li>Vaya a <strong>Settings &gt; Pages</strong> en su repositorio.</li>
+                                <li>En <em>Branch</em>, seleccione <strong>main</strong> y guarde. En 1 minuto tendrá su web activa en <code class="bg-slate-200 px-1 rounded">usuario.github.io/reporte-iturriza</code>.</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Opción 3: Vercel -->
+                    <div class="rounded-2xl border border-slate-200 p-5 bg-slate-50/50 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="px-2.5 py-1 rounded-lg bg-blue-100 text-blue-800 text-xs font-bold">Alta Velocidad</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="triangle" aria-hidden="true" class="lucide lucide-triangle w-5 h-5 text-slate-900"><path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path></svg>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-800">3. Vercel</h3>
+                            <ol class="mt-3 space-y-2 text-xs text-slate-600 list-decimal list-inside leading-relaxed">
+                                <li>Regístrese gratis en <strong>vercel.com</strong> conectando su cuenta de GitHub.</li>
+                                <li>Haga clic en <strong>"Add New Project"</strong> e importe su repositorio.</li>
+                                <li>Presione <strong>"Deploy"</strong> sin cambiar ninguna configuración.</li>
+                                <li>Obtendrá un dominio gratuito con certificado de seguridad HTTPS automático.</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Nota Técnica sobre Almacenamiento -->
+                <div class="mt-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="database" aria-hidden="true" class="lucide lucide-database w-5 h-5 text-amber-600 shrink-0 mt-0.5"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg>
+                    <div>
+                        <p class="font-bold">Nota sobre cómo funciona el guardado de datos:</p>
+                        <p class="mt-1 leading-relaxed">
+                            Al ser una aplicación gratuita sin base de datos externa de pago, cada usuario guarda los registros en la memoria local de su navegador (<code class="bg-amber-100 px-1 rounded">localStorage</code>) y al finalizar su reporte descarga el archivo <strong>Excel (.xls)</strong> o <strong>TXT (.txt)</strong> para enviarlo por correo electrónico o WhatsApp institucional a la Dirección General.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal para Visualizar Fotografías Adjuntas -->
+    <div id="photo-modal" class="fixed inset-0 z-50 hidden bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4" onclick="closePhotoModal(event)">
+        <div class="bg-white rounded-2xl max-w-3xl w-full overflow-hidden shadow-2xl border border-slate-200" onclick="event.stopPropagation()">
+            <div class="px-5 py-4 bg-institucional-azul text-white flex items-center justify-between">
+                <div>
+                    <h3 id="modal-photo-title" class="text-sm sm:text-base font-bold">Evidencia Fotográfica del Reporte</h3>
+                    <p id="modal-photo-subtitle" class="text-xs text-blue-200"></p>
+                </div>
+                <button onclick="closePhotoModal()" class="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" aria-hidden="true" class="lucide lucide-x w-5 h-5"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                </button>
+            </div>
+            <div id="modal-photo-gallery" class="p-5 grid grid-cols-1 sm:grid-cols-3 gap-4 max-h-[75vh] overflow-y-auto bg-slate-50">
+                <!-- Imágenes dinámicas -->
+            </div>
+            <div class="px-5 py-3 bg-white border-t border-slate-200 flex justify-end">
+                <button onclick="closePhotoModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold hover:bg-slate-900">
+                    Cerrar Galería
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación Personalizado (Reemplazo seguro de confirm) -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 hidden bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center gap-3 text-red-600">
+                <div class="p-2.5 rounded-full bg-red-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="trash-2" aria-hidden="true" class="lucide lucide-trash-2 w-6 h-6"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900">Confirmar Eliminación</h3>
+            </div>
+            <p id="confirm-modal-text" class="text-sm text-slate-600">
+                ¿Está seguro de que desea eliminar este registro de reporte diario? Esta acción no se puede deshacer.
+            </p>
+            <div class="flex justify-end gap-2.5 pt-2">
+                <button onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100">
+                    Cancelar
+                </button>
+                <button id="confirm-modal-action" class="px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-bold hover:bg-red-700">
+                    Sí, Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie de Página Institucional -->
+    <footer class="bg-white border-t border-slate-200 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div class="flex items-center gap-2 font-medium text-slate-700">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shield-check" aria-hidden="true" class="lucide lucide-shield-check w-4 h-4 text-institucional-azul"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                <span>Alcaldía Bolivariana del Municipio Monseñor Iturriza • Dirección de Tecnología e Informática</span>
+            </div>
+            <div>
+                <span>Horario Mañana: 06:00 AM - 11:00 AM | Horario Tarde: 01:00 PM - 08:00 PM</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lógica de la Aplicación -->
+    <script>
+        // =========================================================================
+        // ESTADO GLOBAL Y CONSTANTES
+        // =========================================================================
+        const STORAGE_KEY = 'alcaldia_iturriza_reportes_v1';
+        let isDemoMode = false;
+        let currentPhotos = []; // Almacena objetos { name, dataUrl } (máximo 3)
+        let recordIdToDelete = null;
+
+        // =========================================================================
+        // INICIALIZACIÓN AL CARGAR LA PÁGINA
+        // =========================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            setDefaultDate();
+            updateClockAndSchedules();
+            setInterval(updateClockAndSchedules, 1000);
+            renderRecordsTable();
+        });
+
+        // Establece la fecha actual por defecto en el input de fecha (zona local)
+        function setDefaultDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const todayStr = `${year}-${month}-${day}`;
+            document.getElementById('input-fecha').value = todayStr;
+        }
+
+        // =========================================================================
+        // RELOJ EN TIEMPO REAL Y VALIDACIÓN ESTRICTA DE HORARIOS
+        // =========================================================================
+        function updateClockAndSchedules() {
+            const now = new Date();
+
+            // Formateo de hora 12h con AM/PM
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            document.getElementById('live-clock').textContent = now.toLocaleTimeString('es-VE', timeOptions);
+
+            // Formateo de fecha legible
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('live-date').textContent = now.toLocaleDateString('es-VE', dateOptions);
+
+            // Cálculo de minutos desde medianoche para precisión exacta
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const totalMinutes = hours * 60 + minutes;
+
+            // Ventana Mañana: 06:00 AM (360 min) hasta 11:00 AM (660 min) inclusive
+            const isMorningOpenReal = totalMinutes >= (6 * 60) && totalMinutes <= (11 * 60);
+
+            // Ventana Tarde: 01:00 PM / 13:00 (780 min) hasta 08:00 PM / 20:00 (1200 min) inclusive
+            const isAfternoonOpenReal = totalMinutes >= (13 * 60) && totalMinutes <= (20 * 60);
+
+            // Aplicar estado real o modo prueba
+            const morningEnabled = isDemoMode || isMorningOpenReal;
+            const afternoonEnabled = isDemoMode || isAfternoonOpenReal;
+
+            applyScheduleUI(morningEnabled, afternoonEnabled, isMorningOpenReal, isAfternoonOpenReal);
+        }
+
+        function applyScheduleUI(morningEnabled, afternoonEnabled, isMorningOpenReal, isAfternoonOpenReal) {
+            // Elementos Bloque Mañana
+            const morningTextarea = document.getElementById('input-actividades-realizar');
+            const morningLockAlert = document.getElementById('morning-lock-alert');
+            const morningBlock = document.getElementById('block-morning-container');
+            const cardMorning = document.getElementById('card-status-morning');
+            const badgeMorning = document.getElementById('badge-morning');
+
+            // Elementos Bloque Tarde
+            const afternoonTextarea = document.getElementById('input-actividades-ejecutadas');
+            const btnSelectPhotos = document.getElementById('btn-select-photos');
+            const afternoonLockAlert = document.getElementById('afternoon-lock-alert');
+            const afternoonBlock = document.getElementById('block-afternoon-container');
+            const cardAfternoon = document.getElementById('card-status-afternoon');
+            const badgeAfternoon = document.getElementById('badge-afternoon');
+
+            // Badge global en el header
+            const globalBadge = document.getElementById('schedule-global-badge');
+
+            // --- Configurar UI Mañana ---
+            morningTextarea.disabled = !morningEnabled;
+            if (morningEnabled) {
+                morningLockAlert.innerHTML = `<i data-lucide="unlock" class="w-3.5 h-3.5"></i> ${isDemoMode && !isMorningOpenReal ? 'Habilitado (Modo Prueba)' : 'Ventana Activa (06:00 AM - 11:00 AM)'}`;
+                morningLockAlert.className = 'inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-lg bg-blue-50 text-blue-800 border border-blue-200';
+                morningBlock.classList.remove('border-slate-200', 'bg-slate-50/60');
+                morningBlock.classList.add('border-blue-300', 'bg-white');
+                cardMorning.classList.replace('border-slate-300', 'border-blue-600');
+                badgeMorning.textContent = isDemoMode && !isMorningOpenReal ? 'Modo Prueba' : 'ABIERTO';
+                badgeMorning.className = 'px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 shrink-0';
+            } else {
+                morningLockAlert.innerHTML = `<i data-lucide="lock" class="w-3.5 h-3.5"></i> Horario cerrado: Disponible de 06:00 AM a 11:00 AM`;
+                morningLockAlert.className = 'inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-lg bg-red-50 text-red-700 border border-red-200';
+                morningBlock.classList.remove('border-blue-300', 'bg-white');
+                morningBlock.classList.add('border-slate-200', 'bg-slate-50/60');
+                cardMorning.classList.replace('border-blue-600', 'border-slate-300');
+                badgeMorning.textContent = 'CERRADO';
+                badgeMorning.className = 'px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 shrink-0';
+            }
+
+            // --- Configurar UI Tarde ---
+            afternoonTextarea.disabled = !afternoonEnabled;
+            btnSelectPhotos.disabled = !afternoonEnabled || currentPhotos.length >= 3;
+            if (afternoonEnabled) {
+                afternoonLockAlert.innerHTML = `<i data-lucide="unlock" class="w-3.5 h-3.5"></i> ${isDemoMode && !isAfternoonOpenReal ? 'Habilitado (Modo Prueba)' : 'Ventana Activa (01:00 PM - 08:00 PM)'}`;
+                afternoonLockAlert.className = 'inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200';
+                afternoonBlock.classList.remove('border-slate-200', 'bg-slate-50/60');
+                afternoonBlock.classList.add('border-emerald-300', 'bg-white');
+                cardAfternoon.classList.replace('border-slate-300', 'border-emerald-600');
+                badgeAfternoon.textContent = isDemoMode && !isAfternoonOpenReal ? 'Modo Prueba' : 'ABIERTO';
+                badgeAfternoon.className = 'px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 shrink-0';
+            } else {
+                afternoonLockAlert.innerHTML = `<i data-lucide="lock" class="w-3.5 h-3.5"></i> Horario cerrado: Disponible de 01:00 PM a 08:00 PM`;
+                afternoonLockAlert.className = 'inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-lg bg-red-50 text-red-700 border border-red-200';
+                afternoonBlock.classList.remove('border-emerald-300', 'bg-white');
+                afternoonBlock.classList.add('border-slate-200', 'bg-slate-50/60');
+                cardAfternoon.classList.replace('border-emerald-600', 'border-slate-300');
+                badgeAfternoon.textContent = 'CERRADO';
+                badgeAfternoon.className = 'px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 shrink-0';
+            }
+
+            // --- Configurar Badge Global del Header ---
+            if (isDemoMode) {
+                globalBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span><span>Modo Prueba Activo (Ambos bloques abiertos)</span>`;
+                globalBadge.className = 'mt-1 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/20 text-amber-200 border border-amber-400/40';
+            } else if (isMorningOpenReal) {
+                globalBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>Recepción Activa: Planificación Matutina</span>`;
+                globalBadge.className = 'mt-1 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-200 border border-emerald-400/40';
+            } else if (isAfternoonOpenReal) {
+                globalBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span>Recepción Activa: Cierre de Jornada</span>`;
+                globalBadge.className = 'mt-1 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/20 text-emerald-200 border border-emerald-400/40';
+            } else {
+                globalBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-400"></span><span>Fuera de Horario de Recepción</span>`;
+                globalBadge.className = 'mt-1 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-red-500/20 text-red-200 border border-red-400/40';
+            }
+
+            // Botón Guardar habilitado solo si al menos un bloque está abierto
+            document.getElementById('btn-submit-report').disabled = (!morningEnabled && !afternoonEnabled);
+
+            lucide.createIcons();
+        }
+
+        // Alternar Modo Prueba / Simular Horario
+        function toggleDemoMode() {
+            const checkbox = document.getElementById('demo-mode-toggle');
+            isDemoMode = checkbox.checked;
+
+            const bg = document.getElementById('demo-toggle-bg');
+            const dot = document.getElementById('demo-toggle-dot');
+            const banner = document.getElementById('demo-banner');
+
+            if (isDemoMode) {
+                bg.classList.replace('bg-slate-300', 'bg-amber-500');
+                dot.classList.add('translate-x-4');
+                banner.classList.remove('hidden');
+                showToast('Modo Prueba activado: Ventanas horarias desbloqueadas.', 'warning');
+            } else {
+                bg.classList.replace('bg-amber-500', 'bg-slate-300');
+                dot.classList.remove('translate-x-4');
+                banner.classList.add('hidden');
+                showToast('Modo Prueba desactivado: Validación con hora real restaurada.', 'info');
+            }
+
+            updateClockAndSchedules();
+        }
+
+        // =========================================================================
+        // MANEJO DE FOTOGRAFÍAS (MÁXIMO 3 CON COMPRESIÓN Y VISTA PREVIA)
+        // =========================================================================
+        async function handlePhotoSelection(event) {
+            const files = Array.from(event.target.files);
+            if (!files.length) return;
+
+            const remainingSlots = 3 - currentPhotos.length;
+            if (remainingSlots <= 0) {
+                showToast('Ya ha alcanzado el límite máximo de 3 fotografías.', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            if (files.length > remainingSlots) {
+                showToast(`Solo puede agregar ${remainingSlots} fotografía(s) más. Se tomarán las primeras ${remainingSlots}.`, 'warning');
+            }
+
+            const filesToProcess = files.slice(0, remainingSlots);
+
+            for (const file of filesToProcess) {
+                if (!file.type.startsWith('image/')) {
+                    showToast(`El archivo "${file.name}" no es una imagen válida.`, 'error');
+                    continue;
+                }
+
+                try {
+                    // Comprimir imagen para evitar saturar localStorage y asegurar fluidez
+                    const compressedDataUrl = await compressImage(file, 900, 0.78);
+                    currentPhotos.push({
+                        name: file.name,
+                        dataUrl: compressedDataUrl
+                    });
+                } catch (err) {
+                    showToast(`Error al procesar la imagen ${file.name}.`, 'error');
+                }
+            }
+
+            event.target.value = ''; // Reset input para permitir volver a seleccionar
+            renderPhotoPreviews();
+            updateClockAndSchedules();
+        }
+
+        // Función auxiliar para redimensionar/comprimir imágenes en cliente
+        function compressImage(file, maxWidth, quality) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = reject;
+                };
+                reader.onerror = reject;
+            });
+        }
+
+        function renderPhotoPreviews() {
+            const grid = document.getElementById('photo-previews-grid');
+            const counter = document.getElementById('photo-counter-badge');
+            counter.textContent = `${currentPhotos.length} / 3 fotos cargadas`;
+
+            if (currentPhotos.length === 3) {
+                counter.className = 'text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-100 border border-emerald-300 text-emerald-800';
+            } else {
+                counter.className = 'text-xs font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-slate-700';
+            }
+
+            grid.innerHTML = currentPhotos.map((photo, index) => `
+                <div class="relative group rounded-xl overflow-hidden border border-slate-300 bg-white shadow-sm">
+                    <img src="${photo.dataUrl}" alt="${photo.name}" class="w-full h-36 object-cover">
+                    <div class="p-2 bg-white flex items-center justify-between gap-2">
+                        <span class="text-[11px] font-medium text-slate-600 truncate">${photo.name}</span>
+                        <button type="button" onclick="removePhoto(${index})" title="Eliminar fotografía"
+                            class="p-1 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-colors shrink-0">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                    <span class="absolute top-2 left-2 bg-slate-900/75 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
+                        Foto ${index + 1}
+                    </span>
+                </div>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function removePhoto(index) {
+            currentPhotos.splice(index, 1);
+            renderPhotoPreviews();
+            updateClockAndSchedules();
+        }
+
+        // =========================================================================
+        // ALMACENAMIENTO Y LÓGICA DEL FORMULARIO
+        // =========================================================================
+        function getSavedRecords() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                console.error('Error leyendo localStorage:', e);
+                return [];
+            }
+        }
+
+        function saveRecords(records) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+                return true;
+            } catch (e) {
+                showToast('Memoria del navegador llena. Exporte los datos y limpie registros antiguos.', 'error');
+                return false;
+            }
+        }
+
+        // Verifica si el departamento ya cargó planificación en la mañana para esa fecha
+        function checkExistingMorningRecord() {
+            const fecha = document.getElementById('input-fecha').value;
+            const depto = document.getElementById('input-departamento').value;
+            const notice = document.getElementById('morning-link-notice');
+            const preview = document.getElementById('morning-link-preview');
+
+            if (!fecha || !depto) {
+                notice.classList.add('hidden');
+                return;
+            }
+
+            const records = getSavedRecords();
+            const existing = records.find(r => r.fecha === fecha && r.departamento === depto && r.actividadesRealizar && !r.actividadesEjecutadas);
+
+            if (existing) {
+                notice.classList.remove('hidden');
+                preview.textContent = `"${existing.actividadesRealizar}"`;
+            } else {
+                notice.classList.add('hidden');
+            }
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            const fecha = document.getElementById('input-fecha').value;
+            const departamento = document.getElementById('input-departamento').value;
+            const responsable = document.getElementById('input-responsable').value.trim() || 'No especificado';
+
+            const morningInput = document.getElementById('input-actividades-realizar');
+            const afternoonInput = document.getElementById('input-actividades-ejecutadas');
+
+            const actRealizar = !morningInput.disabled ? morningInput.value.trim() : '';
+            const actEjecutadas = !afternoonInput.disabled ? afternoonInput.value.trim() : '';
+
+            // Validaciones de contenido según bloques activos
+            if (!morningInput.disabled && afternoonInput.disabled && !actRealizar) {
+                showToast('Debe ingresar las Actividades a Realizar correspondientes al horario matutino.', 'error');
+                morningInput.focus();
+                return;
+            }
+
+            if (morningInput.disabled && !afternoonInput.disabled && !actEjecutadas) {
+                showToast('Debe ingresar las Actividades Ejecutadas correspondientes al cierre de jornada.', 'error');
+                afternoonInput.focus();
+                return;
+            }
+
+            if (!morningInput.disabled && !afternoonInput.disabled && !actRealizar && !actEjecutadas) {
+                showToast('Por favor complete al menos uno de los bloques de actividades antes de guardar.', 'error');
+                return;
+            }
+
+            const now = new Date();
+            const horaRegistro = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit', hour12: true });
+            const records = getSavedRecords();
+
+            // Si estamos en la tarde (o modo prueba) y existe un reporte matutino pendiente del mismo departamento y fecha, lo completamos
+            const pendingMorningIndex = records.findIndex(r =>
+                r.fecha === fecha &&
+                r.departamento === departamento &&
+                r.actividadesRealizar &&
+                !r.actividadesEjecutadas &&
+                actEjecutadas
+            );
+
+            if (pendingMorningIndex !== -1 && !actRealizar) {
+                records[pendingMorningIndex].actividadesEjecutadas = actEjecutadas;
+                records[pendingMorningIndex].fotos = [...currentPhotos];
+                records[pendingMorningIndex].horaTarde = horaRegistro;
+                if (responsable !== 'No especificado') {
+                    records[pendingMorningIndex].responsable = responsable;
+                }
+
+                if (saveRecords(records)) {
+                    showToast('¡Cierre de jornada vinculado y guardado exitosamente!', 'success');
+                    resetForm();
+                    renderRecordsTable();
+                }
+                return;
+            }
+
+            // Crear nuevo registro estructurado
+            const newRecord = {
+                id: Date.now(),
+                fecha,
+                departamento,
+                responsable,
+                actividadesRealizar: actRealizar,
+                actividadesEjecutadas: actEjecutadas,
+                fotos: [...currentPhotos],
+                horaManana: actRealizar ? horaRegistro : null,
+                horaTarde: actEjecutadas ? horaRegistro : null,
+                timestamp: now.toISOString()
+            };
+
+            records.unshift(newRecord);
+            if (saveRecords(records)) {
+                showToast('Reporte diario guardado correctamente en el sistema.', 'success');
+                resetForm();
+                renderRecordsTable();
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('input-actividades-realizar').value = '';
+            document.getElementById('input-actividades-ejecutadas').value = '';
+            currentPhotos = [];
+            renderPhotoPreviews();
+            checkExistingMorningRecord();
+            updateClockAndSchedules();
+        }
+
+        // =========================================================================
+        // RENDERIZADO DE TABLA DE REGISTROS Y MODALES
+        // =========================================================================
+        function renderRecordsTable() {
+            const records = getSavedRecords();
+            const filterDate = document.getElementById('filter-date').value;
+            const filterDept = document.getElementById('filter-dept').value;
+
+            document.getElementById('records-count-badge').textContent = records.length;
+
+            const filtered = records.filter(r => {
+                const matchDate = !filterDate || r.fecha === filterDate;
+                const matchDept = !filterDept || r.departamento === filterDept;
+                return matchDate && matchDept;
+            });
+
+            const tbody = document.getElementById('records-table-body');
+            const emptyState = document.getElementById('empty-records-state');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            tbody.innerHTML = filtered.map(r => {
+                const photosCount = r.fotos ? r.fotos.length : 0;
+                const badgeM = r.horaManana ? `<span class="inline-block bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-semibold px-2 py-0.5 rounded">AM: ${r.horaManana}</span>` : '';
+                const badgeT = r.horaTarde ? `<span class="inline-block bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold px-2 py-0.5 rounded">PM: ${r.horaTarde}</span>` : '';
+
+                return `
+                    <tr class="hover:bg-slate-50/80 transition-colors align-top">
+                        <td class="py-3.5 px-4 whitespace-nowrap">
+                            <div class="font-bold text-slate-800">${formatDateShort(r.fecha)}</div>
+                            <div class="flex flex-wrap gap-1 mt-1">${badgeM} ${badgeT}</div>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <div class="font-bold text-institucional-azul">${escapeHTML(r.departamento)}</div>
+                            <div class="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
+                                <i data-lucide="user" class="w-3 h-3"></i>
+                                ${escapeHTML(r.responsable)}
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 max-w-xs">
+                            ${r.actividadesRealizar
+                                ? `<p class="text-slate-700 whitespace-pre-line text-xs leading-relaxed">${escapeHTML(r.actividadesRealizar)}</p>`
+                                : `<span class="text-xs italic text-slate-400">Sin registro matutino</span>`
+                            }
+                        </td>
+                        <td class="py-3.5 px-4 max-w-xs">
+                            ${r.actividadesEjecutadas
+                                ? `<p class="text-slate-700 whitespace-pre-line text-xs leading-relaxed">${escapeHTML(r.actividadesEjecutadas)}</p>`
+                                : `<span class="text-xs italic text-amber-600 bg-amber-50 px-2 py-0.5 rounded">Pendiente cierre de jornada</span>`
+                            }
+                        </td>
+                        <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                            ${photosCount > 0
+                                ? `<button onclick="openPhotoModal(${r.id})" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition-colors">
+                                    <i data-lucide="images" class="w-3.5 h-3.5"></i>
+                                    Ver (${photosCount})
+                                   </button>`
+                                : `<span class="text-xs text-slate-400">0 fotos</span>`
+                            }
+                        </td>
+                        <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                            <button onclick="askDeleteRecord(${r.id})" title="Eliminar registro"
+                                class="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function clearFilters() {
+            document.getElementById('filter-date').value = '';
+            document.getElementById('filter-dept').value = '';
+            renderRecordsTable();
+        }
+
+        // Modal de Galería de Fotos
+        function openPhotoModal(recordId) {
+            const records = getSavedRecords();
+            const record = records.find(r => r.id === recordId);
+            if (!record || !record.fotos || record.fotos.length === 0) return;
+
+            document.getElementById('modal-photo-title').textContent = `Evidencia Fotográfica - ${record.departamento}`;
+            document.getElementById('modal-photo-subtitle').textContent = `Fecha: ${formatDateShort(record.fecha)} • Responsable: ${record.responsable}`;
+
+            const gallery = document.getElementById('modal-photo-gallery');
+            gallery.innerHTML = record.fotos.map((foto, idx) => `
+                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <img src="${foto.dataUrl}" alt="Evidencia ${idx + 1}" class="w-full h-56 object-cover">
+                    <div class="p-2.5 text-xs font-semibold text-slate-700 flex items-center justify-between">
+                        <span>Fotografía #${idx + 1}</span>
+                        <a href="${foto.dataUrl}" download="evidencia_${record.fecha}_${idx + 1}.jpg" class="text-institucional-azul hover:underline flex items-center gap-1">
+                            <i data-lucide="download" class="w-3.5 h-3.5"></i> Bajar
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('photo-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closePhotoModal() {
+            document.getElementById('photo-modal').classList.add('hidden');
+        }
+
+        // Eliminación Segura con Modal Personalizado
+        function askDeleteRecord(id) {
+            recordIdToDelete = id;
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.remove('hidden');
+
+            document.getElementById('confirm-modal-action').onclick = () => {
+                if (recordIdToDelete !== null) {
+                    const updated = getSavedRecords().filter(r => r.id !== recordIdToDelete);
+                    saveRecords(updated);
+                    renderRecordsTable();
+                    checkExistingMorningRecord();
+                    showToast('Registro eliminado correctamente.', 'info');
+                }
+                closeConfirmModal();
+            };
+        }
+
+        function closeConfirmModal() {
+            recordIdToDelete = null;
+            document.getElementById('confirm-modal').classList.add('hidden');
+        }
+
+        // =========================================================================
+        // EXPORTACIÓN A EXCEL (.XLS) Y TEXTO PLANO (.TXT)
+        // =========================================================================
+        function getFilteredRecordsForExport() {
+            const records = getSavedRecords();
+            const filterDate = document.getElementById('filter-date').value;
+            const filterDept = document.getElementById('filter-dept').value;
+
+            return records.filter(r => {
+                const matchDate = !filterDate || r.fecha === filterDate;
+                const matchDept = !filterDept || r.departamento === filterDept;
+                return matchDate && matchDept;
+            });
+        }
+
+        // Exportar tabla HTML compatible nativamente con Microsoft Excel (.xls) y acentos UTF-8
+        function exportToExcel() {
+            const data = getFilteredRecordsForExport();
+            if (data.length === 0) {
+                showToast('No hay registros disponibles para exportar a Excel.', 'warning');
+                return;
+            }
+
+            let tableHTML = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+                <head><meta charset="UTF-8"></head>
+                <body>
+                    <table border="1" style="border-collapse: collapse; font-family: Arial, sans-serif;">
+                        <thead>
+                            <tr>
+                                <th colspan="7" style="background-color: #0f2c59; color: #ffffff; font-size: 14pt; padding: 10px;">
+                                    ALCALDÍA BOLIVARIANA MONSEÑOR ITURRIZA - REPORTE DIARIO DE TAREAS
+                                </th>
+                            </tr>
+                            <tr style="background-color: #d9e1f2; font-weight: bold;">
+                                <th>Fecha</th>
+                                <th>Departamento / Dirección</th>
+                                <th>Responsable</th>
+                                <th>Actividades a Realizar (06:00 AM - 11:00 AM)</th>
+                                <th>Hora Registro AM</th>
+                                <th>Actividades Ejecutadas (01:00 PM - 08:00 PM)</th>
+                                <th>Hora Registro PM / Fotos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.forEach(r => {
+                const fotosInfo = `${r.horaTarde || 'N/A'} (${r.fotos ? r.fotos.length : 0} fotos adjuntas)`;
+                tableHTML += `
+                    <tr>
+                        <td>${escapeHTML(r.fecha)}</td>
+                        <td>${escapeHTML(r.departamento)}</td>
+                        <td>${escapeHTML(r.responsable)}</td>
+                        <td>${escapeHTML(r.actividadesRealizar || 'Sin registro')}</td>
+                        <td>${escapeHTML(r.horaManana || 'N/A')}</td>
+                        <td>${escapeHTML(r.actividadesEjecutadas || 'Pendiente')}</td>
+                        <td>${escapeHTML(fotosInfo)}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `</tbody></table></body></html>`;
+
+            const blob = new Blob(['\ufeff', tableHTML], { type: 'application/vnd.ms-excel;charset=utf-8' });
+            triggerDownload(blob, `Reporte_Diario_Alcaldia_Iturriza_${getTodayStamp()}.xls`);
+            showToast('Archivo Excel (.xls) descargado exitosamente.', 'success');
+        }
+
+        // Exportar archivo TXT limpio, estructurado y legible
+        function exportToTXT() {
+            const data = getFilteredRecordsForExport();
+            if (data.length === 0) {
+                showToast('No hay registros disponibles para exportar a TXT.', 'warning');
+                return;
+            }
+
+            const divider = '================================================================================\n';
+            const subDivider = '--------------------------------------------------------------------------------\n';
+
+            let txtContent = divider;
+            txtContent += 'ALCALDÍA BOLIVARIANA MONSEÑOR ITURRIZA\n';
+            txtContent += 'SISTEMA DE REPORTE DIARIO DE TAREAS Y GESTIÓN OPERATIVA\n';
+            txtContent += `Fecha de generación: ${new Date().toLocaleString('es-VE')}\n`;
+            txtContent += `Total de registros exportados: ${data.length}\n`;
+            txtContent += divider + '\n';
+
+            data.forEach((r, idx) => {
+                txtContent += `REGISTRO #${idx + 1}\n`;
+                txtContent += `Fecha:        ${r.fecha}\n`;
+                txtContent += `Departamento: ${r.departamento}\n`;
+                txtContent += `Responsable:  ${r.responsable}\n`;
+                txtContent += `Horario AM:   ${r.horaManana || 'No registrado'}\n`;
+                txtContent += `Horario PM:   ${r.horaTarde || 'No registrado'}\n`;
+                txtContent += `Evidencias:   ${r.fotos ? r.fotos.length : 0} fotografía(s) adjunta(s)\n\n`;
+                txtContent += `[ACTIVIDADES A REALIZAR (06:00 AM - 11:00 AM)]:\n`;
+                txtContent += `${r.actividadesRealizar || 'Sin registro matutino.'}\n\n`;
+                txtContent += `[ACTIVIDADES EJECUTADAS (01:00 PM - 08:00 PM)]:\n`;
+                txtContent += `${r.actividadesEjecutadas || 'Pendiente cierre de jornada.'}\n`;
+                txtContent += subDivider + '\n';
+            });
+
+            const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+            triggerDownload(blob, `Reporte_Diario_Alcaldia_Iturriza_${getTodayStamp()}.txt`);
+            showToast('Archivo de texto (.txt) descargado exitosamente.', 'success');
+        }
+
+        // Descargar este mismo archivo HTML para subirlo a Netlify / GitHub Pages / Vercel
+        function downloadSelfHTML() {
+            const fullHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            const blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+            triggerDownload(blob, 'index.html');
+            showToast('Archivo index.html descargado. Listo para subir a Netlify o GitHub Pages.', 'success');
+        }
+
+        function triggerDownload(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // =========================================================================
+        // NAVEGACIÓN DE PESTAÑAS Y UTILIDADES UI
+        // =========================================================================
+        function switchTab(tabName) {
+            const views = ['registro', 'historial', 'guia'];
+            views.forEach(v => {
+                const section = document.getElementById(`view-${v}`);
+                const btn = document.getElementById(`tab-btn-${v}`);
+                if (v === tabName) {
+                    section.classList.remove('hidden');
+                    btn.className = 'tab-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-institucional-azul text-white shadow-sm transition-all';
+                } else {
+                    section.classList.add('hidden');
+                    btn.className = 'tab-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all';
+                }
+            });
+
+            if (tabName === 'historial') {
+                renderRecordsTable();
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            const styles = {
+                success: 'bg-emerald-800 text-white border-emerald-600',
+                error: 'bg-red-800 text-white border-red-600',
+                warning: 'bg-amber-700 text-white border-amber-500',
+                info: 'bg-institucional-azul text-white border-blue-600'
+            };
+
+            const icons = {
+                success: 'check-circle',
+                error: 'alert-circle',
+                warning: 'alert-triangle',
+                info: 'info'
+            };
+
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-xs sm:text-sm font-medium transition-all transform translate-y-0 opacity-100 ${styles[type] || styles.info}`;
+            toast.innerHTML = `
+                <i data-lucide="${icons[type] || icons.info}" class="w-5 h-5 shrink-0"></i>
+                <span class="flex-grow">${escapeHTML(message)}</span>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function formatDateShort(dateStr) {
+            if (!dateStr) return '';
+            const [y, m, d] = dateStr.split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        function getTodayStamp() {
+            const now = new Date();
+            return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+
+</body></html>
